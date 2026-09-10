@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Demo.PlayPlatform/Demo.PlayPlatform.csproj" />
+    <Project Path="src/PlayTest.Core/PlayTest.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Contract/">
+    <Project Path="tests/Contract/PlayTest.Contract.csproj" />
+  </Folder>
+  <Folder Name="/tests/EndToEnd/">
+    <Project Path="tests/EndToEnd/PlayTest.EndToEnd.csproj" />
+  </Folder>
+  <Folder Name="/tests/Integration/">
+    <Project Path="tests/Integration/PlayTest.Integration.csproj" />
+  </Folder>
+  <Folder Name="/tests/Performance/">
+    <Project Path="tests/Performance/PlayTest.Performance.csproj" />
+  </Folder>
+  <Folder Name="/tests/Unit/">
+    <Project Path="tests/Unit/PlayTest.Unit.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/TestReportGenerator/TestReportGenerator.csproj" />
+  </Folder>
+</Solution>
