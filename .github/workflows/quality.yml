@@ -1,0 +1,40 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Unit Tests
+        run: dotnet test tests/Unit --no-build --configuration Release --logger "trx;LogFileName=unit-results.trx" --collect:"XPlat Code Coverage"
+
+      - name: Integration Tests
+        run: dotnet test tests/Integration --no-build --configuration Release --logger "trx;LogFileName=integration-results.trx"
+
+      - name: Contract Tests
+        run: dotnet test tests/Contract --no-build --configuration Release --logger "trx;LogFileName=contract-results.trx"
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: "**/TestResults/**"
