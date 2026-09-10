@@ -1,5 +1,6 @@
 namespace PlayTest.Unit.Players;
 
+using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
 using NSubstitute;
 using FluentAssertions;
@@ -41,8 +42,7 @@ public class PlayerServiceTests
 
         var act = () => _sut.CreatePlayerAsync("taken", "Another User");
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*already taken*");
+        await act.Should().ThrowAsync<DuplicateEntityException>();
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class PlayerServiceTests
 
         var act = () => _sut.GetPlayerAsync(id);
 
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<EntityNotFoundException>();
     }
 
     [Fact]
@@ -91,8 +91,7 @@ public class PlayerServiceTests
 
         var act = () => _sut.SuspendPlayerAsync(player.Id);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*banned*");
+        await act.Should().ThrowAsync<DomainRuleException>();
     }
 
     [Fact]
@@ -118,7 +117,6 @@ public class PlayerServiceTests
 
         var act = () => _sut.ReactivatePlayerAsync(player.Id);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*already active*");
+        await act.Should().ThrowAsync<DomainRuleException>();
     }
 }

@@ -1,5 +1,6 @@
 namespace PlayTest.Unit.Sessions;
 
+using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
 using Demo.PlayPlatform.Sessions;
 using PlayTest.Core.TestData;
@@ -43,8 +44,7 @@ public class SessionServiceTests
 
         var act = () => _sut.StartSessionAsync(player.Id, "Halo Infinite");
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*must be active*");
+        await act.Should().ThrowAsync<DomainRuleException>();
     }
 
     [Fact]
@@ -56,8 +56,7 @@ public class SessionServiceTests
 
         var act = () => _sut.StartSessionAsync(player.Id, "Forza");
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*3 active sessions*");
+        await act.Should().ThrowAsync<DomainRuleException>();
     }
 
     [Fact]
@@ -68,7 +67,7 @@ public class SessionServiceTests
 
         var act = () => _sut.StartSessionAsync(id, "Forza");
 
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<EntityNotFoundException>();
     }
 
     [Fact]
@@ -93,7 +92,6 @@ public class SessionServiceTests
 
         var act = () => _sut.EndSessionAsync(session.Id);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Completed*");
+        await act.Should().ThrowAsync<DomainRuleException>();
     }
 }

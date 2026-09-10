@@ -1,5 +1,6 @@
 namespace Demo.PlayPlatform.Sessions;
 
+using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
 
 public class SessionService
@@ -10,8 +11,8 @@ public class SessionService
 
     public SessionService(ISessionRepository sessionRepository, IPlayerRepository playerRepository)
     {
-        _sessionRepository = sessionRepository;
-        _playerRepository = playerRepository;
+        _sessionRepository = sessionRepository ?? throw new ArgumentNullException(nameof(sessionRepository));
+        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
     public async Task<GameSession> StartSessionAsync(Guid playerId, string gameTitle, CancellationToken ct = default)
@@ -19,14 +20,16 @@ public class SessionService
         ArgumentException.ThrowIfNullOrWhiteSpace(gameTitle);
 
         var player = await _playerRepository.GetByIdAsync(playerId, ct)
-            ?? throw new KeyNotFoundException($"Player '{playerId}' not found.");
+            ?? throw new EntityNotFoundException("Player", playerId);
 
         if (player.Status != PlayerStatus.Active)
-            throw new InvalidOperationException($"Player must be active to start a session. Current status: {player.Status}.");
+            throw new DomainRuleException("PlayerNotActive",
+                $"Player must be active to start a session. Current status: {player.Status}.");
 
         var activeSessions = await _sessionRepository.GetActiveSessionCountAsync(playerId, ct);
         if (activeSessions >= MaxConcurrentSessions)
-            throw new InvalidOperationException($"Player already has {MaxConcurrentSessions} active sessions.");
+            throw new DomainRuleException("MaxSessionsReached",
+                $"Player already has {MaxConcurrentSessions} active sessions.");
 
         var session = GameSession.Start(playerId, gameTitle);
         return await _sessionRepository.CreateAsync(session, ct);
@@ -35,10 +38,11 @@ public class SessionService
     public async Task<GameSession> EndSessionAsync(Guid sessionId, CancellationToken ct = default)
     {
         var session = await _sessionRepository.GetByIdAsync(sessionId, ct)
-            ?? throw new KeyNotFoundException($"Session '{sessionId}' not found.");
+            ?? throw new EntityNotFoundException("GameSession", sessionId);
 
         if (session.Status != SessionStatus.Active)
-            throw new InvalidOperationException($"Cannot end a session that is {session.Status}.");
+            throw new DomainRuleException("SessionNotActive",
+                $"Cannot end a session that is {session.Status}.");
 
         var ended = session with
         {
