@@ -1,9 +1,12 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Demo.PlayPlatform.Api/Demo.PlayPlatform.Api.csproj" />
     <Project Path="src/Demo.PlayPlatform/Demo.PlayPlatform.csproj" />
     <Project Path="src/PlayTest.Core/PlayTest.Core.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/PlayTest.TestInfrastructure/PlayTest.TestInfrastructure.csproj" />
+  </Folder>
   <Folder Name="/tests/Contract/">
     <Project Path="tests/Contract/PlayTest.Contract.csproj" />
   </Folder>
