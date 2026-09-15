@@ -2,8 +2,14 @@ using System.Xml.Linq;
 
 namespace TestReportGenerator;
 
+/// <summary>
+/// Reads one or more Visual Studio TRX files and aggregates outcomes by test identity.
+/// </summary>
 public static class TrxResultReader
 {
+    /// <summary>
+    /// Resolves a TRX file or recursively discovers TRX files beneath a directory.
+    /// </summary>
     public static IReadOnlyList<string> ResolveTrxFiles(string inputPath)
     {
         if (File.Exists(inputPath))
@@ -24,6 +30,9 @@ public static class TrxResultReader
         return files;
     }
 
+    /// <summary>
+    /// Builds deterministic reliability metrics from test outcomes across multiple runs.
+    /// </summary>
     public static ReliabilityReport BuildReport(IEnumerable<string> trxFiles)
     {
         var outcomes = new Dictionary<string, List<string>>(StringComparer.Ordinal);
@@ -98,6 +107,7 @@ public static class TrxResultReader
         var failed = outcomes.Count(outcome =>
             string.Equals(outcome, "Failed", StringComparison.OrdinalIgnoreCase));
         var skipped = outcomes.Count - passed - failed;
+        // Minority outcomes express instability; a test that always fails is a defect, not a flaky test.
         var score = passed > 0 && failed > 0
             ? decimal.Round((decimal)Math.Min(passed, failed) / outcomes.Count, 4)
             : 0m;

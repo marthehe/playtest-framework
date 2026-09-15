@@ -31,6 +31,7 @@ app.UseExceptionHandler(exceptionHandler =>
             _ => (StatusCodes.Status500InternalServerError, "Unexpected error")
         };
 
+        // Public responses intentionally omit exception messages to avoid leaking domain or runtime details.
         context.Response.StatusCode = status;
         await Results.Problem(statusCode: status, title: title).ExecuteAsync(context);
     });

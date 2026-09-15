@@ -3,6 +3,9 @@ namespace Demo.PlayPlatform.Sessions;
 using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
 
+/// <summary>
+/// Coordinates game session lifecycle rules across player and session repositories.
+/// </summary>
 public class SessionService
 {
     private readonly ISessionRepository _sessionRepository;
@@ -15,6 +18,9 @@ public class SessionService
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
+    /// <summary>
+    /// Starts a session for an active player who has not reached the concurrency limit.
+    /// </summary>
     public async Task<GameSession> StartSessionAsync(Guid playerId, string gameTitle, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(gameTitle);
@@ -35,6 +41,9 @@ public class SessionService
         return await _sessionRepository.CreateAsync(session, ct);
     }
 
+    /// <summary>
+    /// Completes an active session and records its end time.
+    /// </summary>
     public async Task<GameSession> EndSessionAsync(Guid sessionId, CancellationToken ct = default)
     {
         var session = await _sessionRepository.GetByIdAsync(sessionId, ct)

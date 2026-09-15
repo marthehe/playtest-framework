@@ -3,6 +3,9 @@ namespace Demo.PlayPlatform.Achievements;
 using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
 
+/// <summary>
+/// Enforces achievement eligibility and duplicate-unlock rules.
+/// </summary>
 public class AchievementService
 {
     private readonly IAchievementRepository _achievementRepository;
@@ -14,6 +17,9 @@ public class AchievementService
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
+    /// <summary>
+    /// Unlocks a known achievement once for an active player.
+    /// </summary>
     public async Task<PlayerAchievement> UnlockAchievementAsync(
         Guid playerId, string achievementKey, Guid? sessionId = null, CancellationToken ct = default)
     {
@@ -36,6 +42,9 @@ public class AchievementService
         return await _achievementRepository.UnlockAsync(playerAchievement, ct);
     }
 
+    /// <summary>
+    /// Returns all achievements unlocked by a known player.
+    /// </summary>
     public async Task<IReadOnlyList<PlayerAchievement>> GetPlayerAchievementsAsync(
         Guid playerId, CancellationToken ct = default)
     {
