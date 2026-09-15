@@ -20,6 +20,7 @@ PlayTest/
 |       +-- Players/            # Player profiles and state management
 |       +-- Sessions/           # Game session lifecycle
 |       +-- Achievements/       # Achievement tracking and unlocking
+|   +-- Demo.PlayPlatform.Api/  # HTTP API and in-memory adapter layer
 |
 +-- tests/
 |   +-- Unit/                   # Isolated business logic tests
@@ -82,7 +83,15 @@ dotnet test
 dotnet test tests/Unit
 
 # With coverage
-dotnet test tests/Unit --collect:"XPlat Code Coverage"
+dotnet test tests/Unit --configuration Release \
+  /p:CollectCoverage=true \
+  /p:Threshold=80 \
+  /p:ThresholdType=line \
+  /p:ThresholdStat=total
+
+# Generate a reliability report from one or more TRX files
+dotnet run --project tools/TestReportGenerator -- TestResults \
+  --output TestResults/test-reliability-report.json
 ```
 
 ## CI Quality Gate
@@ -92,25 +101,31 @@ Every PR runs the full pipeline via GitHub Actions:
 2. Unit Tests
 3. Integration Tests
 4. Contract Tests
-5. Test result upload
+5. End-to-End Tests
+6. Test reliability report
+7. Test result upload
+
+The line coverage gate is deterministic and fails below 80%. The current domain coverage is
+92.62%. Reliability reporting identifies tests that have both passed and failed across the
+supplied TRX history. A consistently failing test is treated as a defect, not mislabeled as flaky.
 
 ## Roadmap
 
-### V1 (Current) - Framework Foundation
+### V1 - Framework Foundation
 - [x] Domain model (Players, Sessions, Achievements)
 - [x] Test data builders
 - [x] Custom assertions
 - [x] Unit tests with xUnit + NSubstitute + FluentAssertions
 - [x] GitHub Actions CI pipeline
-- [ ] Integration test infrastructure
-- [ ] Configuration management
+- [x] Integration test infrastructure
+- [x] Configuration management
 
-### V2 - Quality Engineering
-- [ ] Contract testing
-- [ ] E2E player journey scenarios
-- [ ] Coverage gates (target: 80%)
-- [ ] Test reporting
-- [ ] Flaky-test detection and reliability metrics
+### V2 (Current) - Quality Engineering
+- [x] Contract testing
+- [x] End-to-end player journey scenarios
+- [x] Coverage gate (minimum: 80%)
+- [x] Structured JSON test reporting
+- [x] Flaky-test detection and reliability metrics
 
 ### V3 - AI-Assisted Quality
 - [ ] LLM-based failure classification
@@ -126,6 +141,9 @@ Every PR runs the full pipeline via GitHub Actions:
 | Assertions | FluentAssertions | Readable failure messages, fluent chaining |
 | Test data | Builder pattern | Readable defaults, explicit overrides, immutable objects |
 | AI in quality gates | Deterministic only | LLMs assist triage, not pass/fail decisions |
+| Contract validation | System.Text.Json | Deterministic schema checks without another external dependency |
+| Test API storage | Thread-safe in-memory adapters | Repeatable isolated tests without external infrastructure |
+| Dependency versions | Pinned | Reproducible builds and reduced supply-chain uncertainty |
 
 ## License
 
