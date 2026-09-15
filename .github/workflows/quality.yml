@@ -33,13 +33,26 @@ jobs:
           /p:Threshold=80
           /p:ThresholdType=line
           /p:ThresholdStat=total
-          /p:Exclude="[PlayTest.Core]*"
+          /p:Exclude="[PlayTest.Core]*%2c[TestReportGenerator]*"
 
       - name: Integration Tests
         run: dotnet test tests/Integration --no-build --configuration Release --logger "trx;LogFileName=integration-results.trx"
 
       - name: Contract Tests
         run: dotnet test tests/Contract --no-build --configuration Release --logger "trx;LogFileName=contract-results.trx"
+
+      - name: End-to-End Tests
+        run: dotnet test tests/EndToEnd --no-build --configuration Release --logger "trx;LogFileName=e2e-results.trx"
+
+      - name: Generate Test Reliability Report
+        run: >
+          dotnet run
+          --project tools/TestReportGenerator
+          --no-build
+          --configuration Release
+          --
+          .
+          --output TestResults/test-reliability-report.json
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4

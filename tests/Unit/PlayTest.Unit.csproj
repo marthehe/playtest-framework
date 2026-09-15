@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PlayTest.Core\PlayTest.Core.csproj" />
     <ProjectReference Include="..\..\src\Demo.PlayPlatform\Demo.PlayPlatform.csproj" />
+    <ProjectReference Include="..\..\tools\TestReportGenerator\TestReportGenerator.csproj" />
   </ItemGroup>
 
 </Project>
