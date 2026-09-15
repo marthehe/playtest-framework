@@ -11,9 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="FluentAssertions" Version="*" />
+    <PackageReference Include="FluentAssertions" Version="8.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="NSubstitute" Version="*" />
+    <PackageReference Include="NSubstitute" Version="6.2.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PlayTest.Core\PlayTest.Core.csproj" />
     <ProjectReference Include="..\..\src\Demo.PlayPlatform\Demo.PlayPlatform.csproj" />
+    <ProjectReference Include="..\PlayTest.TestInfrastructure\PlayTest.TestInfrastructure.csproj" />
   </ItemGroup>
 
 </Project>
