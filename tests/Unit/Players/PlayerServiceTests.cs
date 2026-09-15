@@ -2,8 +2,8 @@ namespace PlayTest.Unit.Players;
 
 using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
-using NSubstitute;
 using FluentAssertions;
+using NSubstitute;
 
 public class PlayerServiceTests
 {

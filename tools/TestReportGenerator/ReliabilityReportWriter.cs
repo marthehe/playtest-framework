@@ -4,7 +4,7 @@ namespace TestReportGenerator;
 
 public static class ReliabilityReportWriter
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    private static readonly JsonSerializerOptions s_serializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true
@@ -23,7 +23,7 @@ public static class ReliabilityReportWriter
         await JsonSerializer.SerializeAsync(
             stream,
             report,
-            SerializerOptions,
+            s_serializerOptions,
             cancellationToken);
     }
 }

@@ -3,9 +3,9 @@ namespace PlayTest.Unit.Sessions;
 using Demo.PlayPlatform.Exceptions;
 using Demo.PlayPlatform.Players;
 using Demo.PlayPlatform.Sessions;
-using PlayTest.Core.TestData;
-using NSubstitute;
 using FluentAssertions;
+using NSubstitute;
+using PlayTest.Core.TestData;
 
 public class SessionServiceTests
 {
