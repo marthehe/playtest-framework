@@ -24,7 +24,16 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Unit Tests
-        run: dotnet test tests/Unit --no-build --configuration Release --logger "trx;LogFileName=unit-results.trx" --collect:"XPlat Code Coverage"
+        run: >
+          dotnet test tests/Unit
+          --no-build
+          --configuration Release
+          --logger "trx;LogFileName=unit-results.trx"
+          /p:CollectCoverage=true
+          /p:Threshold=80
+          /p:ThresholdType=line
+          /p:ThresholdStat=total
+          /p:Exclude="[PlayTest.Core]*"
 
       - name: Integration Tests
         run: dotnet test tests/Integration --no-build --configuration Release --logger "trx;LogFileName=integration-results.trx"

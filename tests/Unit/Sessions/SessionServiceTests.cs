@@ -94,4 +94,16 @@ public class SessionServiceTests
 
         await act.Should().ThrowAsync<DomainRuleException>();
     }
+
+    [Fact]
+    public async Task EndSession_WhenSessionDoesNotExist_ThrowsNotFound()
+    {
+        var sessionId = Guid.NewGuid();
+        _sessionRepo.GetByIdAsync(sessionId, Arg.Any<CancellationToken>())
+            .Returns((GameSession?)null);
+
+        var act = () => _sut.EndSessionAsync(sessionId);
+
+        await act.Should().ThrowAsync<EntityNotFoundException>();
+    }
 }

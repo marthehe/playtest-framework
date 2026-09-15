@@ -95,6 +95,19 @@ public class PlayerServiceTests
     }
 
     [Fact]
+    public async Task SuspendPlayer_WhenAlreadySuspended_ThrowsDomainRule()
+    {
+        var player = new PlayTest.Core.TestData.PlayerBuilder().Suspended().Build();
+        _repository.GetByIdAsync(player.Id, Arg.Any<CancellationToken>())
+            .Returns(player);
+
+        var act = () => _sut.SuspendPlayerAsync(player.Id);
+
+        await act.Should().ThrowAsync<DomainRuleException>()
+            .Where(exception => exception.Rule == "AlreadySuspended");
+    }
+
+    [Fact]
     public async Task ReactivatePlayer_WhenSuspended_SetsActiveStatus()
     {
         var player = new PlayTest.Core.TestData.PlayerBuilder().Suspended().Build();
@@ -118,5 +131,18 @@ public class PlayerServiceTests
         var act = () => _sut.ReactivatePlayerAsync(player.Id);
 
         await act.Should().ThrowAsync<DomainRuleException>();
+    }
+
+    [Fact]
+    public async Task ReactivatePlayer_WhenBanned_ThrowsDomainRule()
+    {
+        var player = new PlayTest.Core.TestData.PlayerBuilder().Banned().Build();
+        _repository.GetByIdAsync(player.Id, Arg.Any<CancellationToken>())
+            .Returns(player);
+
+        var act = () => _sut.ReactivatePlayerAsync(player.Id);
+
+        await act.Should().ThrowAsync<DomainRuleException>()
+            .Where(exception => exception.Rule == "ReactivateNotAllowed");
     }
 }
