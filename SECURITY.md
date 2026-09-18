@@ -20,6 +20,26 @@ However, I take dependency security seriously:
 - Dependabot monitors NuGet packages and GitHub Actions
 - GitHub Actions are pinned to immutable commit SHAs
 
+## AI-Assisted Failure Triage
+
+Failure triage is advisory and cannot change a test result or quality-gate outcome. The default
+analyzer is local and deterministic. External processing occurs only when a user explicitly passes
+`--ai` and configures an OpenAI-compatible endpoint.
+
+Before external analysis, the tool:
+
+- Redacts common passwords, keys, bearer tokens, JSON Web Tokens, email addresses, and Windows user
+  profile names
+- Truncates diagnostic evidence to a fixed maximum length
+- Treats all test output as untrusted data and instructs the model not to follow embedded content
+- Requires structured JSON and rejects invalid categories or empty summaries
+- Reads the API key only from `PLAYTEST_AI_API_KEY`, never from a command-line argument
+
+Automated redaction is not a complete data-loss-prevention system. TRX files can contain source
+paths, test data, request content, or application output that is unsuitable for a third party.
+Users must review their data-handling requirements and the configured provider before enabling
+external analysis.
+
 ## Dependency Policy
 
 - Only well-established, actively maintained packages from verified publishers

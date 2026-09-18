@@ -50,7 +50,8 @@ jobs:
       - name: End-to-End Tests
         run: dotnet test tests/EndToEnd --no-build --configuration Release --logger "trx;LogFileName=e2e-results.trx"
 
-      - name: Generate Test Reliability Report
+      - name: Generate Test Health Reports
+        if: always()
         run: >
           dotnet run
           --project tools/TestReportGenerator
@@ -59,6 +60,8 @@ jobs:
           --
           .
           --output TestResults/test-reliability-report.json
+          --triage-output TestResults/test-failure-triage.json
+          --labels tests/Unit/Reporting/Fixtures/labelled-failures.json
 
       - name: Upload Test Results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

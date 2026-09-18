@@ -44,11 +44,11 @@ V1 and V2 are implemented.
 | GitHub Actions pipeline hardening | Complete |
 | Performance scenarios | Planned |
 | Cross-run CI history collection | Planned |
-| AI-assisted failure triage | Planned for V3 |
+| AI-assisted failure triage | Complete |
 
 The current suite contains:
 
-- 28 unit test cases
+- 38 unit test cases
 - 3 integration tests
 - 2 contract tests
 - 2 end-to-end tests
@@ -257,6 +257,8 @@ End-to-end tests
   |
 Reliability report
   |
+Advisory failure triage
+  |
 Test artifact upload
 ```
 
@@ -299,6 +301,46 @@ The current CI workflow reports on the TRX files produced by one workflow execut
 supports multiple historical files, but automatic retrieval of artifacts from earlier workflow
 runs is not implemented yet. Therefore, the CI report is currently a foundation for cross-run
 analysis rather than a complete historical monitoring system.
+
+## AI-assisted failure triage
+
+V3 extends `TestReportGenerator` with advisory analysis of failed TRX results. It extracts the test
+identity, error message, stack trace, and captured standard output, then produces:
+
+- A likely failure category
+- A concise evidence-based summary
+- Up to three investigation areas
+- A confidence score and analyzer identity
+
+The default `rule-based-v1` analyzer works offline and classifies broad failure types:
+
+- Assertion failure
+- Timeout
+- External dependency
+- Configuration
+- Test data or shared state
+- Application defect
+- Unknown
+
+This analyzer is intentionally transparent and limited. It provides a deterministic baseline,
+not a claim that keyword matching can diagnose every failure.
+
+An optional OpenAI-compatible analyzer can be enabled explicitly. It uses temperature zero,
+requests structured JSON, constrains categories to the same fixed taxonomy, and rejects malformed
+responses. Common credentials and personal identifiers are redacted before transmission, and the
+diagnostic payload is bounded. Test output is still potentially sensitive, so external analysis
+must only be enabled when the configured provider and data-handling policy are appropriate.
+
+AI never controls the build. Test outcomes, coverage thresholds, and workflow status remain
+deterministic. If explicitly requested AI analysis fails, the command reports an error rather than
+silently substituting a success-shaped result.
+
+### Labelled evaluation
+
+The repository contains 12 labelled failure examples covering the six known categories. Unit tests
+evaluate the offline analyzer against this dataset and enforce at least 90% classification
+accuracy. This small synthetic dataset detects obvious regression but does not establish
+production-level generalisation.
 
 ## Security approach
 
@@ -348,7 +390,8 @@ form. See [SECURITY.md](SECURITY.md).
 - .NET 8 SDK
 - Git
 
-No database, container runtime, cloud subscription, API key, or secret is required.
+No database, container runtime, cloud subscription, API key, or secret is required for the
+framework or default offline triage.
 
 ### Clone and restore
 
@@ -405,6 +448,36 @@ dotnet run \
   --output TestResults/test-reliability-report.json
 ```
 
+### Generate an advisory failure-triage report
+
+```bash
+dotnet run \
+  --project tools/TestReportGenerator \
+  -- TestResults \
+  --output TestResults/test-reliability-report.json \
+  --triage-output TestResults/test-failure-triage.json \
+  --labels tests/Unit/Reporting/Fixtures/labelled-failures.json
+```
+
+### Use optional OpenAI-compatible analysis
+
+Configure a full chat-completions endpoint, model, and key in environment variables. Do not place
+the key in shell history or repository files.
+
+```bash
+export PLAYTEST_AI_ENDPOINT="https://provider.example/v1/chat/completions"
+export PLAYTEST_AI_MODEL="model-name"
+export PLAYTEST_AI_API_KEY="secret"
+
+dotnet run \
+  --project tools/TestReportGenerator \
+  -- TestResults \
+  --triage-output TestResults/test-failure-triage.json \
+  --ai
+```
+
+See [SECURITY.md](SECURITY.md) before sending test diagnostics to an external service.
+
 ## API routes
 
 | Method | Route | Purpose |
@@ -440,7 +513,7 @@ Example player request:
 | Contract checks | `System.Text.Json` | No extra package and explicit assertions | Not a full consumer-driven contract platform |
 | Coverage | 80% line threshold | Detects significant coverage regression | Coverage does not prove assertion quality |
 | Flakiness | Mixed-outcome calculation | Separates instability from consistent failure | Requires multiple historical runs for strong evidence |
-| AI decisions | Not used in quality gates | Keeps pass and fail decisions reproducible | Triage assistance is deferred to V3 |
+| AI decisions | Advisory only | Keeps pass and fail decisions reproducible | Output still requires human verification |
 
 ## Known limitations
 
@@ -450,6 +523,9 @@ Example player request:
 - Contract tests validate response shape but not compatibility between independently deployed
   services.
 - CI reliability reports currently use results from one workflow run.
+- Failure categories are broad and cannot identify every root cause.
+- The labelled triage dataset is synthetic and intentionally small.
+- Optional external analysis depends on provider availability and data-handling suitability.
 - The performance project is scaffolded but does not yet contain load scenarios.
 - The API is designed for automated test demonstrations, not production deployment.
 
@@ -488,11 +564,11 @@ clear learning or quality-engineering outcome.
 
 ### V3 - AI-assisted quality
 
-- [ ] Classify failed-test output into likely failure categories
-- [ ] Produce concise failure summaries
-- [ ] Suggest investigation areas without changing pass or fail results
-- [ ] Evaluate classification accuracy against labelled failures
-- [ ] Document privacy, prompt-injection, and hallucination risks
+- [x] Classify failed-test output into likely failure categories
+- [x] Produce concise failure summaries
+- [x] Suggest investigation areas without changing pass or fail results
+- [x] Evaluate classification accuracy against labelled failures
+- [x] Document privacy, prompt-injection, and hallucination risks
 
 AI will assist diagnosis only. Deterministic tests and explicit thresholds will continue to control
 quality-gate outcomes.

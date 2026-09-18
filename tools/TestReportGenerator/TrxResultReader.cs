@@ -76,7 +76,7 @@ public static class TrxResultReader
             tests);
     }
 
-    private static Dictionary<string, string> BuildTestNameLookup(XDocument document)
+    internal static Dictionary<string, string> BuildTestNameLookup(XDocument document)
     {
         return document.Descendants()
             .Where(element => element.Name.LocalName == "UnitTest")

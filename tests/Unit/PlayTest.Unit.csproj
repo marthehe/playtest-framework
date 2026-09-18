@@ -32,4 +32,9 @@
     <ProjectReference Include="..\..\tools\TestReportGenerator\TestReportGenerator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Reporting\Fixtures\labelled-failures.json"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

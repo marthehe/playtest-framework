@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Assertion.EqualValue",
+    "message": "Expected score to be 100, but found 98. Xunit.Sdk.EqualException",
+    "stackTrace": "at PlayTest.ScoreTests.EqualValue()",
+    "standardOutput": "",
+    "expectedCategory": "AssertionFailure"
+  },
+  {
+    "name": "Assertion.ResponseShape",
+    "message": "FluentAssertions expected the JSON property to exist.",
+    "stackTrace": "at PlayTest.ContractTests.ResponseShape()",
+    "standardOutput": "",
+    "expectedCategory": "AssertionFailure"
+  },
+  {
+    "name": "Timeout.Request",
+    "message": "System.TimeoutException: The request timed out after 30 seconds.",
+    "stackTrace": "at PlayTest.ApiTests.Request()",
+    "standardOutput": "",
+    "expectedCategory": "Timeout"
+  },
+  {
+    "name": "Timeout.Cancellation",
+    "message": "TaskCanceledException: The operation canceled after exceeding its deadline.",
+    "stackTrace": "at PlayTest.SessionTests.Cancellation()",
+    "standardOutput": "",
+    "expectedCategory": "Timeout"
+  },
+  {
+    "name": "Dependency.Unavailable",
+    "message": "HttpRequestException: Service unavailable with status code 503.",
+    "stackTrace": "at PlayTest.DependencyTests.Unavailable()",
+    "standardOutput": "",
+    "expectedCategory": "ExternalDependency"
+  },
+  {
+    "name": "Dependency.Socket",
+    "message": "SocketException: Connection refused by the remote host.",
+    "stackTrace": "at PlayTest.DependencyTests.Socket()",
+    "standardOutput": "",
+    "expectedCategory": "ExternalDependency"
+  },
+  {
+    "name": "Configuration.Endpoint",
+    "message": "Missing setting for the service endpoint.",
+    "stackTrace": "at PlayTest.ConfigurationTests.Endpoint()",
+    "standardOutput": "",
+    "expectedCategory": "Configuration"
+  },
+  {
+    "name": "Configuration.Environment",
+    "message": "Required environment variable PLAYTEST_STORAGE was not configured.",
+    "stackTrace": "at PlayTest.ConfigurationTests.Environment()",
+    "standardOutput": "",
+    "expectedCategory": "Configuration"
+  },
+  {
+    "name": "State.Duplicate",
+    "message": "A player with this username already exists.",
+    "stackTrace": "at PlayTest.PlayerTests.Duplicate()",
+    "standardOutput": "",
+    "expectedCategory": "TestDataOrState"
+  },
+  {
+    "name": "State.Constraint",
+    "message": "Database constraint failed while seeding test data.",
+    "stackTrace": "at PlayTest.RepositoryTests.Constraint()",
+    "standardOutput": "",
+    "expectedCategory": "TestDataOrState"
+  },
+  {
+    "name": "Defect.Null",
+    "message": "NullReferenceException: Object reference was null.",
+    "stackTrace": "at PlayTest.PlayerService.Create()",
+    "standardOutput": "",
+    "expectedCategory": "ApplicationDefect"
+  },
+  {
+    "name": "Defect.InvalidOperation",
+    "message": "InvalidOperationException: Sequence contains no matching element.",
+    "stackTrace": "at PlayTest.AchievementService.Unlock()",
+    "standardOutput": "",
+    "expectedCategory": "ApplicationDefect"
+  }
+]

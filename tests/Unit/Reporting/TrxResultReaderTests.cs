@@ -54,6 +54,42 @@ public sealed class TrxResultReaderTests : IDisposable
         act.Should().Throw<ArgumentException>();
     }
 
+    [Fact]
+    public void ReadFailures_FailedResult_ExtractsDiagnosticEvidence()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "failed.trx");
+        File.WriteAllText(
+            path,
+            """
+            <TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+              <Results>
+                <UnitTestResult testId="test-1" testName="CanCreatePlayer" outcome="Failed">
+                  <Output>
+                    <ErrorInfo>
+                      <Message>Expected status code 201 but found 409.</Message>
+                      <StackTrace>at PlayTest.ExampleTests.CanCreatePlayer()</StackTrace>
+                    </ErrorInfo>
+                    <StdOut>Request completed.</StdOut>
+                  </Output>
+                </UnitTestResult>
+              </Results>
+              <TestDefinitions>
+                <UnitTest id="test-1">
+                  <TestMethod className="PlayTest.ExampleTests" name="CanCreatePlayer" />
+                </UnitTest>
+              </TestDefinitions>
+            </TestRun>
+            """);
+
+        var failure = TrxFailureReader.ReadFailures([path]).Should().ContainSingle().Subject;
+
+        failure.Test.Should().Be("PlayTest.ExampleTests.CanCreatePlayer");
+        failure.Message.Should().Be("Expected status code 201 but found 409.");
+        failure.StackTrace.Should().Contain("CanCreatePlayer");
+        failure.StandardOutput.Should().Be("Request completed.");
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_directory))
