@@ -24,6 +24,7 @@ try
         $"Potentially flaky tests: {report.PotentiallyFlakyTests}.");
     Console.WriteLine($"Reliability report: {options.ReliabilityOutputPath}");
 
+    FailureTriageReport? triageReport = null;
     if (options.TriageOutputPath is not null)
     {
         using var httpClient = new HttpClient();
@@ -44,7 +45,7 @@ try
             evaluation = await FailureTriageEvaluator.EvaluateAsync(labels, analyzer);
         }
 
-        var triageReport = new FailureTriageReport(
+        triageReport = new FailureTriageReport(
             DateTime.UtcNow,
             analyzer.Name,
             triageResults.Count,
@@ -62,6 +63,15 @@ try
                 $"({evaluation.Accuracy:P1}).");
         Console.WriteLine($"Failure triage report: {options.TriageOutputPath}");
         Console.WriteLine("Triage is advisory and does not alter test or quality-gate outcomes.");
+    }
+
+    if (options.SummaryOutputPath is not null)
+    {
+        await TestHealthSummaryWriter.WriteAsync(
+            report,
+            triageReport,
+            options.SummaryOutputPath);
+        Console.WriteLine($"Test health summary: {options.SummaryOutputPath}");
     }
 
     return 0;

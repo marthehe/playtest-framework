@@ -7,13 +7,14 @@ public sealed record CliOptions(
     string InputPath,
     string ReliabilityOutputPath,
     string? TriageOutputPath,
+    string? SummaryOutputPath,
     string? LabelsPath,
     bool UseAi)
 {
     public const string Usage =
         "Usage: dotnet run --project tools/TestReportGenerator -- " +
         "<TRX file or directory> [--output <path>] [--triage-output <path>] " +
-        "[--labels <path>] [--ai]";
+        "[--summary-output <path>] [--labels <path>] [--ai]";
 
     /// <summary>
     /// Parses paths and feature switches without accepting unknown arguments.
@@ -28,6 +29,7 @@ public sealed record CliOptions(
             Environment.CurrentDirectory,
             "test-reliability-report.json");
         string? triageOutputPath = null;
+        string? summaryOutputPath = null;
         string? labelsPath = null;
         var useAi = false;
 
@@ -40,6 +42,9 @@ public sealed record CliOptions(
                     break;
                 case "--triage-output":
                     triageOutputPath = ReadPathValue(args, ref index, "--triage-output");
+                    break;
+                case "--summary-output":
+                    summaryOutputPath = ReadPathValue(args, ref index, "--summary-output");
                     break;
                 case "--labels":
                     labelsPath = ReadPathValue(args, ref index, "--labels");
@@ -61,6 +66,7 @@ public sealed record CliOptions(
             inputPath,
             reliabilityOutputPath,
             triageOutputPath,
+            summaryOutputPath,
             labelsPath,
             useAi);
     }

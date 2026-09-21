@@ -41,6 +41,7 @@ V1 and V2 are implemented.
 | End-to-end player journeys | Complete |
 | 80% line coverage quality gate | Complete |
 | TRX reliability reporting | Complete |
+| Human-readable test health summary | Complete |
 | GitHub Actions pipeline hardening | Complete |
 | Performance scenarios | Planned |
 | Cross-run CI history collection | Planned |
@@ -302,6 +303,17 @@ supports multiple historical files, but automatic retrieval of artifacts from ea
 runs is not implemented yet. Therefore, the CI report is currently a foundation for cross-run
 analysis rather than a complete historical monitoring system.
 
+### Human-readable test health summary
+
+`TestReportGenerator` can combine the reliability and advisory triage results into a Markdown
+summary. It reports the overall status, execution counts, potentially flaky tests, failed-test
+triage, and labelled-classification accuracy when those inputs are available.
+
+The quality workflow stores this as `TestResults/test-health-summary.md`, uploads it with the other
+test artifacts, and publishes the same content to the GitHub Actions job summary. The Markdown
+report is informational; deterministic test and coverage commands continue to decide whether the
+workflow succeeds.
+
 ## AI-assisted failure triage
 
 V3 extends `TestReportGenerator` with advisory analysis of failed TRX results. It extracts the test
@@ -456,6 +468,7 @@ dotnet run \
   -- TestResults \
   --output TestResults/test-reliability-report.json \
   --triage-output TestResults/test-failure-triage.json \
+  --summary-output TestResults/test-health-summary.md \
   --labels tests/Unit/Reporting/Fixtures/labelled-failures.json
 ```
 
@@ -559,7 +572,7 @@ clear learning or quality-engineering outcome.
 - [ ] Retrieve historical TRX artifacts across CI runs
 - [ ] Add a configurable flakiness quality threshold
 - [ ] Add deterministic latency and throughput scenarios
-- [ ] Publish a human-readable test health summary
+- [x] Publish a human-readable test health summary
 - [ ] Add repository implementations that model persistence boundaries
 
 ### V3 - AI-assisted quality

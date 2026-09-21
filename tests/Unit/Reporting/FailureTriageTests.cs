@@ -115,6 +115,58 @@ public sealed class FailureTriageTests
         requestBody.Should().Contain("[REDACTED]");
     }
 
+    [Fact]
+    public async Task WriteAsync_ReportsReliabilityTriageAndEvaluationAsMarkdown()
+    {
+        var outputPath = Path.Combine(
+            Path.GetTempPath(),
+            $"playtest-health-{Guid.NewGuid():N}.md");
+        var reliability = new ReliabilityReport(
+            DateTime.UtcNow,
+            5,
+            1,
+            [
+                new TestReliability("Tests.Flaky|Case", 3, 2, 1, 0, 0.3333m),
+                new TestReliability("Tests.Passing", 2, 2, 0, 0, 0m)
+            ]);
+        var triage = new FailureTriageReport(
+            DateTime.UtcNow,
+            "rule-based-v1",
+            1,
+            new FailureTriageEvaluation(
+                12,
+                12,
+                1m,
+                new Dictionary<FailureCategory, decimal>()),
+            [
+                new FailureTriage(
+                    "Tests.Flaky|Case",
+                    FailureCategory.AssertionFailure,
+                    "Expected 2 | found 1.",
+                    ["Review the assertion."],
+                    0.88m,
+                    "rule-based-v1",
+                    ["expected"])
+            ]);
+
+        try
+        {
+            await TestHealthSummaryWriter.WriteAsync(reliability, triage, outputPath);
+            var markdown = await File.ReadAllTextAsync(outputPath);
+
+            markdown.Should().Contain("# PlayTest test health");
+            markdown.Should().Contain("**Status:** Attention required");
+            markdown.Should().Contain(@"Tests.Flaky\|Case");
+            markdown.Should().Contain(@"Expected 2 \| found 1.");
+            markdown.Should().Contain("12/12 correct (100.0%)");
+            markdown.Should().Contain("advisory");
+        }
+        finally
+        {
+            File.Delete(outputPath);
+        }
+    }
+
     private static FailureEvidence CreateFailure(string message)
     {
         return new FailureEvidence(

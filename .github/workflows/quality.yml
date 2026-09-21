@@ -61,7 +61,16 @@ jobs:
           .
           --output TestResults/test-reliability-report.json
           --triage-output TestResults/test-failure-triage.json
+          --summary-output TestResults/test-health-summary.md
           --labels tests/Unit/Reporting/Fixtures/labelled-failures.json
+
+      - name: Publish Test Health Summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f TestResults/test-health-summary.md ]; then
+            cat TestResults/test-health-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload Test Results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
