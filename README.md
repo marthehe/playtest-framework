@@ -42,6 +42,7 @@ V1 and V2 are implemented.
 | 80% line coverage quality gate | Complete |
 | TRX reliability reporting | Complete |
 | Human-readable test health summary | Complete |
+| Configurable flakiness quality gate | Complete |
 | GitHub Actions pipeline hardening | Complete |
 | Performance scenarios | Planned |
 | Cross-run CI history collection | Planned |
@@ -49,7 +50,7 @@ V1 and V2 are implemented.
 
 The current suite contains:
 
-- 38 unit test cases
+- 46 unit test cases
 - 3 integration tests
 - 2 contract tests
 - 2 end-to-end tests
@@ -303,6 +304,21 @@ supports multiple historical files, but automatic retrieval of artifacts from ea
 runs is not implemented yet. Therefore, the CI report is currently a foundation for cross-run
 analysis rather than a complete historical monitoring system.
 
+### Flakiness quality gate
+
+The reliability command accepts an optional `--flakiness-threshold` value greater than zero and no
+greater than `0.5`, which is the maximum possible score under the minority-outcome formula. When
+the option is omitted, reliability analysis remains informational and cannot fail the command.
+
+When explicitly configured, any mixed-outcome test whose score meets or exceeds the threshold
+causes the report command to return exit code `1`. JSON, Markdown, and advisory triage artifacts
+are written before the exit code is returned, so a failed gate retains its diagnostic evidence.
+Invalid configuration returns exit code `2`.
+
+The GitHub Actions workflow currently uses a threshold of `0.10`. This means a test with one
+minority outcome across ten recorded executions reaches the threshold. The gate will become more
+meaningful when historical workflow artifacts are included in the next V2.1 increment.
+
 ### Human-readable test health summary
 
 `TestReportGenerator` can combine the reliability and advisory triage results into a Markdown
@@ -469,7 +485,8 @@ dotnet run \
   --output TestResults/test-reliability-report.json \
   --triage-output TestResults/test-failure-triage.json \
   --summary-output TestResults/test-health-summary.md \
-  --labels tests/Unit/Reporting/Fixtures/labelled-failures.json
+  --labels tests/Unit/Reporting/Fixtures/labelled-failures.json \
+  --flakiness-threshold 0.10
 ```
 
 ### Use optional OpenAI-compatible analysis
@@ -570,7 +587,7 @@ clear learning or quality-engineering outcome.
 ### V2.1 - Reliability and performance
 
 - [ ] Retrieve historical TRX artifacts across CI runs
-- [ ] Add a configurable flakiness quality threshold
+- [x] Add a configurable flakiness quality threshold
 - [ ] Add deterministic latency and throughput scenarios
 - [x] Publish a human-readable test health summary
 - [ ] Add repository implementations that model persistence boundaries

@@ -151,7 +151,9 @@ public sealed class FailureTriageTests
 
         try
         {
-            await TestHealthSummaryWriter.WriteAsync(reliability, triage, outputPath);
+            var gate = FlakinessGate.Evaluate(reliability, 0.25m);
+
+            await TestHealthSummaryWriter.WriteAsync(reliability, triage, gate, outputPath);
             var markdown = await File.ReadAllTextAsync(outputPath);
 
             markdown.Should().Contain("# PlayTest test health");
@@ -159,6 +161,7 @@ public sealed class FailureTriageTests
             markdown.Should().Contain(@"Tests.Flaky\|Case");
             markdown.Should().Contain(@"Expected 2 \| found 1.");
             markdown.Should().Contain("12/12 correct (100.0%)");
+            markdown.Should().Contain("1 breach(es) at 25.0%");
             markdown.Should().Contain("advisory");
         }
         finally

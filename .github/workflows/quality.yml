@@ -63,6 +63,7 @@ jobs:
           --triage-output TestResults/test-failure-triage.json
           --summary-output TestResults/test-health-summary.md
           --labels tests/Unit/Reporting/Fixtures/labelled-failures.json
+          --flakiness-threshold 0.10
 
       - name: Publish Test Health Summary
         if: always()

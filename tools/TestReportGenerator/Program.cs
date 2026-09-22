@@ -17,12 +17,21 @@ try
 {
     var trxFiles = TrxResultReader.ResolveTrxFiles(options.InputPath);
     var report = TrxResultReader.BuildReport(trxFiles);
+    var flakinessGate = options.FlakinessThreshold is null
+        ? null
+        : FlakinessGate.Evaluate(report, options.FlakinessThreshold.Value);
     await ReliabilityReportWriter.WriteAsync(report, options.ReliabilityOutputPath);
 
     Console.WriteLine(
         $"Analysed {report.TotalRuns} test runs across {report.Tests.Count} tests. " +
         $"Potentially flaky tests: {report.PotentiallyFlakyTests}.");
     Console.WriteLine($"Reliability report: {options.ReliabilityOutputPath}");
+    if (flakinessGate is not null)
+    {
+        Console.WriteLine(
+            $"Flakiness threshold: {flakinessGate.Threshold:P1}. " +
+            $"Breaches: {flakinessGate.Breaches.Count}.");
+    }
 
     FailureTriageReport? triageReport = null;
     if (options.TriageOutputPath is not null)
@@ -70,8 +79,17 @@ try
         await TestHealthSummaryWriter.WriteAsync(
             report,
             triageReport,
+            flakinessGate,
             options.SummaryOutputPath);
         Console.WriteLine($"Test health summary: {options.SummaryOutputPath}");
+    }
+
+    if (flakinessGate?.IsBreached == true)
+    {
+        Console.Error.WriteLine(
+            $"{flakinessGate.Breaches.Count} test(s) met or exceeded the configured " +
+            $"flakiness threshold of {flakinessGate.Threshold:P1}.");
+        return 1;
     }
 
     return 0;

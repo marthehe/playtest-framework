@@ -16,6 +16,7 @@ public static class TestHealthSummaryWriter
     public static async Task WriteAsync(
         ReliabilityReport reliabilityReport,
         FailureTriageReport? triageReport,
+        FlakinessGateResult? flakinessGate,
         string outputPath,
         CancellationToken cancellationToken = default)
     {
@@ -43,6 +44,8 @@ public static class TestHealthSummaryWriter
             $"| Failed executions | {failedRuns.ToString(CultureInfo.InvariantCulture)} |");
         summary.AppendLine(
             $"| Potentially flaky tests | {reliabilityReport.PotentiallyFlakyTests.ToString(CultureInfo.InvariantCulture)} |");
+        summary.AppendLine(
+            $"| Flakiness gate | {FormatGate(flakinessGate)} |");
         summary.AppendLine();
 
         AppendFlakyTests(summary, reliabilityReport);
@@ -51,8 +54,9 @@ public static class TestHealthSummaryWriter
         summary.AppendLine("## Interpretation");
         summary.AppendLine();
         summary.AppendLine(
-            "Reliability metrics are deterministic. Failure triage is advisory and cannot change " +
-            "test outcomes or quality-gate decisions.");
+            "Reliability metrics and an explicitly configured flakiness threshold are " +
+            "deterministic. Failure triage is advisory and cannot change test outcomes or " +
+            "quality-gate decisions.");
 
         await File.WriteAllTextAsync(
             outputPath,
@@ -147,5 +151,16 @@ public static class TestHealthSummaryWriter
     private static string FormatPercentage(decimal value, string format)
     {
         return $"{(value * 100).ToString(format, CultureInfo.InvariantCulture)}%";
+    }
+
+    private static string FormatGate(FlakinessGateResult? gate)
+    {
+        if (gate is null)
+            return "Not configured";
+
+        var outcome = gate.IsBreached
+            ? $"{gate.Breaches.Count} breach(es)"
+            : "Passed";
+        return $"{outcome} at {FormatPercentage(gate.Threshold, "0.0")}";
     }
 }
