@@ -45,12 +45,12 @@ V1 and V2 are implemented.
 | Configurable flakiness quality gate | Complete |
 | GitHub Actions pipeline hardening | Complete |
 | Performance scenarios | Planned |
-| Cross-run CI history collection | Planned |
+| Cross-run CI history collection | Complete |
 | AI-assisted failure triage | Complete |
 
 The current suite contains:
 
-- 46 unit test cases
+- 47 unit test cases
 - 3 integration tests
 - 2 contract tests
 - 2 end-to-end tests
@@ -299,10 +299,15 @@ Example output:
 }
 ```
 
-The current CI workflow reports on the TRX files produced by one workflow execution. The tool
-supports multiple historical files, but automatic retrieval of artifacts from earlier workflow
-runs is not implemented yet. Therefore, the CI report is currently a foundation for cross-run
-analysis rather than a complete historical monitoring system.
+Before generating the report, CI retrieves retained `test-results` artifacts from up to ten
+earlier completed `main` push runs. It uses the workflow's built-in GitHub token and a
+repository-owned PowerShell script; no third-party download action or additional credential is
+required.
+
+Historical files are extracted to `.test-history`, outside `TestResults`, so old results are not
+uploaded again inside each new artifact. GitHub artifact retention still limits how much history
+is available. Runs with expired or missing artifacts are reported and skipped, while API or
+download failures remain explicit workflow failures.
 
 ### Flakiness quality gate
 
@@ -316,8 +321,8 @@ are written before the exit code is returned, so a failed gate retains its diagn
 Invalid configuration returns exit code `2`.
 
 The GitHub Actions workflow currently uses a threshold of `0.10`. This means a test with one
-minority outcome across ten recorded executions reaches the threshold. The gate will become more
-meaningful when historical workflow artifacts are included in the next V2.1 increment.
+minority outcome across ten recorded executions reaches the threshold. Current and retained
+historical TRX files are evaluated together.
 
 ### Human-readable test health summary
 
@@ -386,7 +391,7 @@ Security decisions are intentionally visible in the repository.
 
 ### CI controls
 
-- Workflow permissions are explicitly limited to `contents: read`.
+- Workflow permissions are explicitly limited to `contents: read` and `actions: read`.
 - Checkout credentials are not persisted.
 - Third-party actions are pinned to immutable commit SHAs.
 - Jobs use a timeout to prevent uncontrolled execution.
@@ -586,7 +591,7 @@ clear learning or quality-engineering outcome.
 
 ### V2.1 - Reliability and performance
 
-- [ ] Retrieve historical TRX artifacts across CI runs
+- [x] Retrieve historical TRX artifacts across CI runs
 - [x] Add a configurable flakiness quality threshold
 - [ ] Add deterministic latency and throughput scenarios
 - [x] Publish a human-readable test health summary

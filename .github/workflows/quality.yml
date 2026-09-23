@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build-and-test:
@@ -49,6 +50,19 @@ jobs:
 
       - name: End-to-End Tests
         run: dotnet test tests/EndToEnd --no-build --configuration Release --logger "trx;LogFileName=e2e-results.trx"
+
+      - name: Download Historical Test Results
+        if: always()
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >
+          ./tools/ci/Download-TestHistory.ps1
+          -Repository "${{ github.repository }}"
+          -Token $env:GITHUB_TOKEN
+          -CurrentRunId ${{ github.run_id }}
+          -MaxRuns 10
+          -Destination ".test-history"
 
       - name: Generate Test Health Reports
         if: always()

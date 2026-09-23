@@ -5,5 +5,6 @@ obj/
 .vs/
 *.DotSettings.user
 TestResults/
+.test-history/
 coverage/
 coverage*.json

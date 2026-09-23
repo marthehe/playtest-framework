@@ -55,6 +55,22 @@ public sealed class TrxResultReaderTests : IDisposable
     }
 
     [Fact]
+    public void ResolveTrxFiles_NestedHistory_ReturnsCurrentAndHistoricalResults()
+    {
+        Directory.CreateDirectory(_directory);
+        var current = WriteTrx(
+            Path.Combine("tests", "Unit", "TestResults", "current.trx"),
+            "Passed");
+        var historical = WriteTrx(
+            Path.Combine(".test-history", "12345", "tests", "Unit", "historical.trx"),
+            "Failed");
+
+        var files = TrxResultReader.ResolveTrxFiles(_directory);
+
+        files.Should().BeEquivalentTo([current, historical]);
+    }
+
+    [Fact]
     public void ReadFailures_FailedResult_ExtractsDiagnosticEvidence()
     {
         Directory.CreateDirectory(_directory);
@@ -99,6 +115,7 @@ public sealed class TrxResultReaderTests : IDisposable
     private string WriteTrx(string fileName, string outcome)
     {
         var path = Path.Combine(_directory, fileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(
             path,
             $$"""
